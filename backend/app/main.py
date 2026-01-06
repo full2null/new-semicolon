@@ -1,9 +1,12 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 
 from .api import answers, auth, questions, users
 from .core.config import settings
-from .core.database import Base, engine
+from .core.database import Base, engine, get_db
+from .crud import get_stats
+from .schemas import ApiResponse, success_response
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -79,3 +82,10 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+
+@app.get("/api/v1/stats", response_model=ApiResponse[dict])
+def read_stats(db: Session = Depends(get_db)):
+    """전체 통계 조회 (질문 수, 답변 수, 사용자 수)"""
+    stats = get_stats(db)
+    return success_response(data=stats, message="통계를 불러왔습니다.")

@@ -1,7 +1,24 @@
 <script>
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
+  import { get_stats } from "$lib/api/client.js";
 
   const dispatch = createEventDispatcher();
+
+  // 통계 데이터
+  let stats = {
+    question_count: 0,
+    answer_count: 0,
+    user_count: 0,
+  };
+
+  // 컴포넌트 마운트 시 통계 로드
+  onMount(async () => {
+    try {
+      stats = await get_stats();
+    } catch (error) {
+      console.error("통계 로드 실패:", error);
+    }
+  });
 
   // 인기 질문 데이터 (샘플)
   const hot_questions = [
@@ -55,15 +72,21 @@
       </p>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="p-4 bg-card rounded-lg border">
-          <h3 class="text-2xl font-bold text-primary mb-2">1,234</h3>
+          <h3 class="text-2xl font-bold text-primary mb-2">
+            {stats.question_count.toLocaleString()}
+          </h3>
           <p class="text-sm text-muted-foreground">질문</p>
         </div>
         <div class="p-4 bg-card rounded-lg border">
-          <h3 class="text-2xl font-bold text-primary mb-2">5,678</h3>
+          <h3 class="text-2xl font-bold text-primary mb-2">
+            {stats.answer_count.toLocaleString()}
+          </h3>
           <p class="text-sm text-muted-foreground">답변</p>
         </div>
         <div class="p-4 bg-card rounded-lg border">
-          <h3 class="text-2xl font-bold text-primary mb-2">890</h3>
+          <h3 class="text-2xl font-bold text-primary mb-2">
+            {stats.user_count.toLocaleString()}
+          </h3>
           <p class="text-sm text-muted-foreground">사용자</p>
         </div>
       </div>
@@ -82,7 +105,13 @@
       </div>
       <div class="space-y-4">
         {#each hot_questions as q (q.id)}
-          <div class="p-4 bg-card rounded-lg border hover:border-primary transition-colors cursor-pointer" on:click={() => go_to_question(q.id)} role="button" tabindex="0" on:keydown={(e) => e.key === 'Enter' && go_to_question(q.id)}>
+          <div
+            class="p-4 bg-card rounded-lg border hover:border-primary transition-colors cursor-pointer"
+            on:click={() => go_to_question(q.id)}
+            role="button"
+            tabindex="0"
+            on:keydown={(e) => e.key === "Enter" && go_to_question(q.id)}
+          >
             <h3 class="text-lg font-semibold mb-2 hover:text-primary">
               {q.title}
             </h3>

@@ -3,14 +3,13 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from ..core.security import get_password_hash, verify_password
-from ..models import Answer, Question, Tag, User
+from ..models import Answer, Question, User
 from ..schemas import (
     AnswerCreate,
     AnswerUpdate,
     QuestionCreate,
     QuestionUpdate,
     UserCreate,
-    UserUpdate,
 )
 
 
@@ -52,33 +51,36 @@ def authenticate_user(db: Session, username: str, password: str) -> Optional[Use
 
 # Question CRUD
 def get_questions(
-    db: Session, 
-    skip: int = 0, 
+    db: Session,
+    skip: int = 0,
     limit: int = 100,
     search: Optional[str] = None,
-    sort_by: Optional[str] = None
+    sort_by: Optional[str] = None,
 ) -> List[Question]:
     query = db.query(Question)
-    
+
     # 검색어가 있으면 제목 또는 내용에서 검색
     if search:
         search_filter = f"%{search}%"
         query = query.filter(
-            (Question.title.ilike(search_filter)) | 
-            (Question.content.ilike(search_filter))
+            (Question.title.ilike(search_filter))
+            | (Question.content.ilike(search_filter))
         )
-    
+
     # 정렬 처리
-    if sort_by == 'answers':
+    if sort_by == "answers":
         from ..models import Answer
+
         # 답변 개수로 정렬 (많은 순서)
-        query = query.outerjoin(Answer).group_by(Question.id).order_by(
-            db.func.count(Answer.id).desc()
+        query = (
+            query.outerjoin(Answer)
+            .group_by(Question.id)
+            .order_by(db.func.count(Answer.id).desc())
         )
     else:
         # 기본: 최신순 (생성 시간 역순)
         query = query.order_by(Question.created_at.desc())
-    
+
     return query.offset(skip).limit(limit).all()
 
 
@@ -147,3 +149,17 @@ def delete_answer(db: Session, answer_id: int) -> bool:
         db.commit()
         return True
     return False
+
+
+# Stats CRUD
+def get_stats(db: Session) -> dict:
+    """전체 통계 조회 (질문 수, 답변 수, 사용자 수)"""
+    question_count = db.query(Question).count()
+    answer_count = db.query(Answer).count()
+    user_count = db.query(User).count()
+
+    return {
+        "question_count": question_count,
+        "answer_count": answer_count,
+        "user_count": user_count,
+    }

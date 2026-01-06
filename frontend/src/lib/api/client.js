@@ -1,9 +1,9 @@
 // API 클라이언트 기본 설정
-import { get } from 'svelte/store';
-import { authStore } from '$lib/stores/auth.js';
+import { get } from "svelte/store";
+import { authStore } from "$lib/stores/auth.js";
 
 // 백엔드 API 기본 URL
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 
 /**
  * API 요청 에러
@@ -13,7 +13,7 @@ export class ApiError extends Error {
     super(message);
     this.status = status;
     this.data = data;
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 }
 
@@ -25,16 +25,16 @@ export class ApiError extends Error {
  */
 export async function api_request(endpoint, options = {}) {
   const auth = get(authStore);
-  
+
   // 기본 헤더 설정
   const headers = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...options.headers,
   };
 
   // 인증 토큰 있으면 추가
   if (auth.token) {
-    headers['Authorization'] = `Bearer ${auth.token}`;
+    headers["Authorization"] = `Bearer ${auth.token}`;
   }
 
   // 요청 보내기
@@ -45,8 +45,8 @@ export async function api_request(endpoint, options = {}) {
 
   // 응답 데이터 파싱
   let data = null;
-  const content_type = response.headers.get('content-type');
-  if (content_type && content_type.includes('application/json')) {
+  const content_type = response.headers.get("content-type");
+  if (content_type && content_type.includes("application/json")) {
     data = await response.json();
   } else {
     data = await response.text();
@@ -54,7 +54,8 @@ export async function api_request(endpoint, options = {}) {
 
   // 에러 처리
   if (!response.ok) {
-    const error_msg = data?.detail || data?.message || `API 요청 실패: ${response.status}`;
+    const error_msg =
+      data?.detail || data?.message || `API 요청 실패: ${response.status}`;
     throw new ApiError(error_msg, response.status, data);
   }
 
@@ -70,7 +71,7 @@ export async function api_get(endpoint, params = null) {
     const query = new URLSearchParams(params).toString();
     url = `${endpoint}?${query}`;
   }
-  return api_request(url, { method: 'GET' });
+  return api_request(url, { method: "GET" });
 }
 
 /**
@@ -78,7 +79,7 @@ export async function api_get(endpoint, params = null) {
  */
 export async function api_post(endpoint, body) {
   return api_request(endpoint, {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify(body),
   });
 }
@@ -88,7 +89,7 @@ export async function api_post(endpoint, body) {
  */
 export async function api_put(endpoint, body) {
   return api_request(endpoint, {
-    method: 'PUT',
+    method: "PUT",
     body: JSON.stringify(body),
   });
 }
@@ -97,5 +98,15 @@ export async function api_put(endpoint, body) {
  * DELETE 요청
  */
 export async function api_delete(endpoint) {
-  return api_request(endpoint, { method: 'DELETE' });
+  return api_request(endpoint, { method: "DELETE" });
+}
+
+/**
+ * 전체 통계 조회
+ * @returns {Promise<{question_count: number, answer_count: number, user_count: number}>}
+ */
+export async function get_stats() {
+  const response = await fetch("http://localhost:8000/api/v1/stats");
+  const result = await response.json();
+  return result.data;
 }
