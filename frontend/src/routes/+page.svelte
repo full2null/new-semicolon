@@ -6,7 +6,6 @@
   import QuestionDetail from "$lib/components/QuestionDetail.svelte";
   import QuestionForm from "$lib/components/QuestionForm.svelte";
   import TagsPage from "$lib/components/TagsPage.svelte";
-  import UsersPage from "$lib/components/UsersPage.svelte";
   import GuidelinesPage from "$lib/components/GuidelinesPage.svelte";
   import HelpPage from "$lib/components/HelpPage.svelte";
   import LoginPage from "$lib/components/LoginPage.svelte";
@@ -127,8 +126,6 @@
         />
       {:else if cur_page === "tags"}
         <TagsPage on:navigate={on_nav} />
-      {:else if cur_page === "users"}
-        <UsersPage on:navigate={on_nav} />
       {:else if cur_page === "guidelines"}
         <GuidelinesPage on:navigate={on_nav} />
       {:else if cur_page === "help"}
