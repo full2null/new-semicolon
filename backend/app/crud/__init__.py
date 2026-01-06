@@ -10,6 +10,7 @@ from ..schemas import (
     QuestionCreate,
     QuestionUpdate,
     UserCreate,
+    UserUpdate,
 )
 
 
@@ -38,6 +39,43 @@ def create_user(db: Session, user: UserCreate) -> User:
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+def update_user(db: Session, user_id: int, user_update: UserUpdate) -> Optional[User]:
+    """사용자 정보 업데이트"""
+    db_user = db.query(User).filter(User.id == user_id).first()
+    if not db_user:
+        return None
+    
+    update_data = user_update.dict(exclude_unset=True)
+    print(f"[DEBUG CRUD] update_data before password hash: {update_data}")
+    
+    # 비밀번호가 포함되어 있으면 해시화
+    if "password" in update_data and update_data["password"]:
+        hashed = get_password_hash(update_data.pop("password"))
+        update_data["hashed_password"] = hashed
+        print(f"[DEBUG CRUD] Password will be updated, hashed_password set")
+    
+    # 필드 업데이트
+    for key, value in update_data.items():
+        setattr(db_user, key, value)
+    
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
+def get_user_stats(db: Session, user_id: int) -> dict:
+    """사용자 통계 조회 (작성한 질문 수, 답변 수)"""
+    question_count = db.query(Question).filter(Question.author_id == user_id).count()
+    answer_count = db.query(Answer).filter(Answer.author_id == user_id).count()
+    
+    print(f"[DEBUG STATS] user_id={user_id}, question_count={question_count}, answer_count={answer_count}")
+    
+    return {
+        "question_count": question_count,
+        "answer_count": answer_count,
+    }
 
 
 def authenticate_user(db: Session, username: str, password: str) -> Optional[User]:

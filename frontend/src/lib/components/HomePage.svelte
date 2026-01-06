@@ -20,42 +20,6 @@
     }
   });
 
-  // 인기 질문 데이터 (샘플)
-  const hot_questions = [
-    {
-      id: "1",
-      title: "React에서 useState를 사용할 때 비동기 문제를 어떻게 해결하나요?",
-      author: "개발자123",
-      votes: 5,
-      answers: 3,
-      views: 142,
-      tags: ["react", "javascript", "useState"],
-    },
-    {
-      id: "2",
-      title: "SvelteKit에서 서버 사이드 렌더링 최적화 방법",
-      author: "프론트엔드러",
-      votes: 12,
-      answers: 7,
-      views: 289,
-      tags: ["svelte", "sveltekit", "ssr", "performance"],
-    },
-    {
-      id: "3",
-      title: "TypeScript에서 Generic 타입을 효과적으로 사용하는 방법",
-      author: "타입마스터",
-      votes: 8,
-      answers: 5,
-      views: 201,
-      tags: ["typescript", "javascript"],
-    },
-  ];
-
-  // 질문 상세로 이동
-  function go_to_question(id) {
-    dispatch("navigate", { page: "question", id });
-  }
-
   // 질문 목록으로 이동
   function go_to_questions() {
     dispatch("navigate", { page: "questions" });
@@ -89,39 +53,6 @@
           </h3>
           <p class="text-sm text-muted-foreground">사용자</p>
         </div>
-      </div>
-    </section>
-
-    <!-- 인기 질문 섹션 -->
-    <section class="mb-8">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-2xl font-bold">인기 질문</h2>
-        <button
-          class="text-primary hover:underline text-sm"
-          on:click={go_to_questions}
-        >
-          모두 보기 →
-        </button>
-      </div>
-      <div class="space-y-4">
-        {#each hot_questions as q (q.id)}
-          <div
-            class="p-4 bg-card rounded-lg border hover:border-primary transition-colors cursor-pointer"
-            on:click={() => go_to_question(q.id)}
-            role="button"
-            tabindex="0"
-            on:keydown={(e) => e.key === "Enter" && go_to_question(q.id)}
-          >
-            <h3 class="text-lg font-semibold mb-2 hover:text-primary">
-              {q.title}
-            </h3>
-            <div class="flex items-center gap-4 text-sm text-muted-foreground">
-              <span>{q.author}</span>
-              <span>•</span>
-              <span>답변 {q.answers}</span>
-            </div>
-          </div>
-        {/each}
       </div>
     </section>
 

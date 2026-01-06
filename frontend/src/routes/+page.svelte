@@ -11,6 +11,7 @@
   import HelpPage from "$lib/components/HelpPage.svelte";
   import LoginPage from "$lib/components/LoginPage.svelte";
   import RegisterPage from "$lib/components/RegisterPage.svelte";
+  import ProfilePage from "$lib/components/ProfilePage.svelte";
   import { authStore } from "$lib/stores/auth.js";
 
   // 상태 변수들
@@ -132,6 +133,8 @@
         <GuidelinesPage on:navigate={on_nav} />
       {:else if cur_page === "help"}
         <HelpPage on:navigate={on_nav} />
+      {:else if cur_page === "profile"}
+        <ProfilePage currentUser={cur_user} on:navigate={on_nav} />
       {:else}
         <HomePage on:navigate={on_nav} />
       {/if}
