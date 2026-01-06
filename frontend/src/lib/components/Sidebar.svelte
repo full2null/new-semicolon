@@ -1,11 +1,37 @@
 <script>
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import { cn } from "$lib/utils.js";
+  import { get_stats } from "$lib/api/stats.js";
 
   /** @type {string} */
   export let currentPage = "home";
 
   const dispatch = createEventDispatcher();
+
+  // 통계 데이터
+  let stats = {
+    question_count: 0,
+    answer_count: 0,
+    user_count: 0,
+  };
+  let loading_stats = false;
+
+  // 통계 불러오기
+  async function load_stats() {
+    try {
+      loading_stats = true;
+      stats = await get_stats();
+    } catch (error) {
+      console.error("통계 로드 실패:", error);
+    } finally {
+      loading_stats = false;
+    }
+  }
+
+  // 컴포넌트 마운트 시 통계 로드
+  onMount(() => {
+    load_stats();
+  });
 
   // 페이지 이동
   function go_to(page) {
@@ -111,20 +137,26 @@
     <!-- 활동 통계 -->
     <div class="mt-8 p-3 bg-muted rounded-lg">
       <h4 class="text-sm font-medium mb-2">활동 통계</h4>
-      <div class="space-y-2 text-sm text-muted-foreground">
-        <div class="flex justify-between">
-          <span>질문</span>
-          <span>1,234</span>
+      {#if loading_stats}
+        <div class="text-center text-sm text-muted-foreground py-2">
+          로딩 중...
         </div>
-        <div class="flex justify-between">
-          <span>답변</span>
-          <span>5,678</span>
+      {:else}
+        <div class="space-y-2 text-sm text-muted-foreground">
+          <div class="flex justify-between">
+            <span>질문</span>
+            <span>{stats.question_count.toLocaleString()}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>답변</span>
+            <span>{stats.answer_count.toLocaleString()}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>사용자</span>
+            <span>{stats.user_count.toLocaleString()}</span>
+          </div>
         </div>
-        <div class="flex justify-between">
-          <span>사용자</span>
-          <span>890</span>
-        </div>
-      </div>
+      {/if}
     </div>
   </div>
 </aside>
